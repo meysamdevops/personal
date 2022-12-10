@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
-	"strconv"
-	"strings"
+	"regexp"
 )
 
 func main() {
 	unique(list("D:\\Video"))
+	//for _, name := range list("D:\\Video") {
+	//	fmt.Println("Young_Sheldon_S05E20_1080p_WEB-DL_30nama_30NAMA.mkv" + "-------" + name + "------>   " + strconv.FormatFloat(Intersection("Young_Sheldon_S05E20_1080p_WEB-DL_30nama_30NAMA.mkv", name), 'f', -1, 32))
+	//}
 }
 
 func list(dir string) []string {
@@ -28,43 +29,62 @@ func list(dir string) []string {
 }
 
 // unique of a string slice
-func unique(list []string) {
-	//un := make(map[string]bool)
+func unique(list []string) []string {
 
-	for _, name1 := range list {
-		for _, name2 := range list {
-			fmt.Println(name1 + "--->" + name2 + ".......  " + strconv.FormatFloat(Intersection(name1, name2), 'E', -1, 32) + " .......")
+	count := 0
+	un := make(map[string]bool)
+	ret := make([]string, 0)
+
+	for _, name := range list {
+		if _, ok := un[name]; !ok {
+			if len(un) != 0 {
+				for key, _ := range un {
+					if Intersection(name, key) > 7 {
+						count++
+					}
+				}
+			} else {
+				//fmt.Println(name)
+				un[name] = true
+			}
 		}
+
+		if count <= 0 {
+			un[name] = true
+		}
+
+		count = 0
 	}
 
-	//for _, name := range list {
-	//	if _, ok := un[name]; !ok {
-	//		un[name] = true
-	//	}
-	//}
+	for name, _ := range un {
+		ret = append(ret, name)
+	}
 
-	//fmt.Println(un)
+	return ret
+
 }
 
 // intersection of to text
-func Intersection(text1, text2 string) float64 {
+func Intersection(text1, text2 string) int {
 	intersection := make([]string, 0)
 	union := make([]string, 0)
 
-	text1s := strings.Split(text1, "_")
-	text2s := strings.Split(text2, "_")
+	r := regexp.MustCompile("[A-Za-z0-9]+")
 
-	fmt.Println(text1s)
-	fmt.Println(text2s)
+	text1s := r.FindAllString(text1, -1)
+	text2s := r.FindAllString(text2, -1)
+
+	//fmt.Println(text1s)
+	//fmt.Println(text2s)
 
 	for i, t1 := range text1s {
 		if i < len(text2s) {
 			if t1 == text2s[i] {
-				fmt.Println(t1+"==", text2s[i])
-				//intersection = append(intersection, t1)
+				//fmt.Println(t1+"==", text2s[i])
+				intersection = append(intersection, t1)
 			} else {
-				fmt.Println(t1+"!=", text2s[i])
-				//union = append(union, t1)
+				//fmt.Println(t1+"!=", text2s[i])
+				union = append(union, t1)
 			}
 		}
 	}
@@ -73,8 +93,8 @@ func Intersection(text1, text2 string) float64 {
 	//fmt.Println("union:", union)
 
 	if len(union) <= 0 {
-		return 100
+		return 10
 	} else {
-		return float64(len(intersection) / len(union))
+		return len(intersection) / len(union)
 	}
 }
